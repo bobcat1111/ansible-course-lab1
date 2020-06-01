@@ -12,15 +12,15 @@
 ~h
 # Command Line History (newest to oldest):
 :wq
-|2,0,1590959269,,"wq"
-:q
-|2,0,1590959242,,"q"
-:q!
-|2,0,1590959080,,"q!"
-:w
-|2,0,1590911543,,"w"
+|2,0,1590988632,,"wq"
 :set paste
-|2,0,1590911321,,"set paste"
+|2,0,1590988251,,"set paste"
+:q
+|2,0,1590988227,,"q"
+:q!
+|2,0,1590988056,,"q!"
+:w
+|2,0,1590982782,,"w"
 :set nopaste
 |2,0,1590908469,,"set nopaste"
 :wr
@@ -39,319 +39,380 @@
 	    - spanning-tree portfast bpduguard default
 |3,0,0,1,1,0,1590907067,"    - spanning-tree portfast bpduguard default"
 ""1	LINE	0
-	[defaults]
-|3,1,1,1,1,0,1590959254,"[defaults]"
-"2	LINE	0
-	          - default-information originate always
-|3,0,2,1,1,0,1590911742,"          - default-information originate always"
-"3	CHAR	0
-	255.255.255.255 area 0
-	
-	      register: print_output
-	
-	    -  debug: var=print_output
-|3,0,3,0,5,0,1590911504,"255.255.255.255 area 0","","      register: print_output","","    -  debug: var=print_output"
-"4	LINE	0
-	      transport: cli
-|3,0,4,1,1,0,1590910284,"      transport: cli"
-"5	LINE	0
-	          - "ip dhcp snooping vlan 100,101"
-	
-	          - no ip dhcp snooping information option 
-	          - ip dhcp snooping
-	          - "ip arp inspection vlan 100,101"
-	          - spanning-tree portfast bpduguard default
-	
-	       register: print_output
-	      
-	    -  debug: var=print_output
-|3,0,5,1,10,0,1590908421,"          - \"ip dhcp snooping vlan 100,101\"","","          - no ip dhcp snooping information option ","          - ip dhcp snooping","          - \"ip arp inspection vlan 100,101\"","          - spanning-tree portfast bpduguard default","","       register: print_output","      ","    -  debug: var=print_output"
-"6	LINE	0
-	          - udld enable
-	          - errdisable recovery cause all
-	          - port-channel load-balance src-dst-ip
-	          - ip name-server 8.8.8.8
-	          - no ip http server
-	          - ip http secure-server
-	
-	          - snmp-server community python1 RO
-	          - snmp-server community python2 RW
-	
-	          - ntp server 87.81.181.2
-	          - ntp update-calendar
-	
-	          - clock timezone PST -8
-	          - clock summer-time PDT recurring
-	          - service timestamps debug datetime msec localtime
-	          - service timestamps log datetime msec localtime
-	
-	          - "vlan 1,10,20,30,40,50,100,101"
-	          - ip default-gateway 172.16.10.200
-|3,0,6,1,20,0,1590908417,"          - udld enable","          - errdisable recovery cause all","          - port-channel load-balance src-dst-ip","          - ip name-server 8.8.8.8","          - no ip http server","          - ip http secure-server","","          - snmp-server community python1 RO","          - snmp-server community python2 RW","","          - ntp server 87.81.181.2","          - ntp update-calendar","","          - clock timezone PST -8",>45
-|<"          - clock summer-time PDT recurring","          - service timestamps debug datetime msec localtime","          - service timestamps log datetime msec localtime","","          - \"vlan 1,10,20,30,40,50,100,101\"","          - ip default-gateway 172.16.10.200"
-"7	LINE	0
-	---
-	
-	- name: Cisco Wired Campus Design
-	  hosts: cml-access
+	  hosts: all
 	  gather_facts: false
 	  connection: local
 	
-	  vars:
-	    cli:
-	      username: david
-	      password: cisco
+	  tasks:
+	    - name: run multiple commands on remote nodes
+	      ios_command:
+	        commands:
+	          - show version
+	          - show ip int brief
+	
+	
+	      register: print_output
+	
+	    -  debug: var=print_output.stdout_lines
+	
+	    - name: save output 
+	      copy: content="{{ print_output.stdout [0] }}" dest="./output/{{ inventory_hostname }}.txt"
+|3,1,1,1,18,0,1590988234,"  hosts: all","  gather_facts: false","  connection: local","","  tasks:","    - name: run multiple commands on remote nodes","      ios_command:","        commands:","          - show version","          - show ip int brief","","","      register: print_output","","    -  debug: var=print_output.stdout_lines","","    - name: save output ",>102
+|<"      copy: content=\"{{ print_output.stdout [0] }}\" dest=\"./output/{{ inventory_hostname }}.txt\""
+"2	LINE	0
+	---
+	- name: show version and other 
+	  hosts: all
+	  gather_facts: false
+	  connection: local
 	
 	  tasks:
-	    - name: Global config settings
-	      ios_config:
-	        provider: "{{ cli }}"
-	        lines:
+	    - name: run multiple commands on remote nodes 
+	      ios_command:
+	       commands:
+	         - show version 
+	         - show ip int bri 
 	
-	          - vtp mode transparent
-	          - spanning-tree mode rapid-pvst
-|3,0,7,1,20,0,1590908415,"---","","- name: Cisco Wired Campus Design","  hosts: cml-access","  gather_facts: false","  connection: local","","  vars:","    cli:","      username: david","      password: cisco","","  tasks:","    - name: Global config settings","      ios_config:","        provider: \"{{ cli }}\"","        lines:","","          - vtp mode transparent","          - spanning-tree mode rapid-pvst"
+	      register: print_output
+	
+	     - debug: var:print_output.stdout_lines
+	
+	
+	---
+	- name: show version and other user level commands
+|3,0,2,1,20,0,1590988232,"---","- name: show version and other ","  hosts: all","  gather_facts: false","  connection: local","","  tasks:","    - name: run multiple commands on remote nodes ","      ios_command:","       commands:","         - show version ","         - show ip int bri ","","      register: print_output","","     - debug: var:print_output.stdout_lines","","","---","- name: show version and other user level commands"
+"3	LINE	0
+	- name: show version 
+|3,0,3,1,1,0,1590987233,"- name: show version "
+"4	LINE	0
+	---
+|3,0,4,1,1,0,1590987232,"---"
+"5	LINE	0
+	 
+|3,0,5,1,1,0,1590984567," "
+"6	LINE	0
+	 
+|3,0,6,1,1,0,1590984566," "
+"7	LINE	0
+	      password: cisco
+|3,0,7,1,1,0,1590984565,"      password: cisco"
 "8	LINE	0
-	    - spanning-tree portfast bpduguard default
-|3,0,8,1,1,0,1590907086,"    - spanning-tree portfast bpduguard default"
+	      username: david
+|3,0,8,1,1,0,1590984565,"      username: david"
 "9	LINE	0
-	172.16.10.5 S5
-|3,0,9,1,1,0,1590905934,"172.16.10.5 S5"
+	    cli:
+|3,0,9,1,1,0,1590984564,"    cli:"
 "-	CHAR	0
 	s
 |3,0,36,0,1,0,1590815938,"s"
 
 # File marks:
-'0  4  6  ~/myansible.yml
-|4,48,4,6,1590959269,"~/myansible.yml"
-'1  26  0  ~/myansible.yml
-|4,49,26,0,1590959242,"~/myansible.yml"
-'2  27  0  ~/myansible.yml
-|4,50,27,0,1590959242,"~/myansible.yml"
-'3  4  10  ~/myansible.yml
-|4,51,4,10,1590959227,"~/myansible.yml"
-'4  5  10  ~/myansible.yml
-|4,52,5,10,1590959227,"~/myansible.yml"
-'5  5  10  ~/myansible.yml
-|4,53,5,10,1590959227,"~/myansible.yml"
-'6  4  11  ~/myansible.yml
-|4,54,4,11,1590959137,"~/myansible.yml"
-'7  4  11  ~/myansible.yml
-|4,55,4,11,1590959137,"~/myansible.yml"
-'8  5  11  ~/myansible.yml
-|4,56,5,11,1590959137,"~/myansible.yml"
-'9  5  11  ~/myansible.yml
-|4,57,5,11,1590959137,"~/myansible.yml"
+'0  13  8  ~/realbackup.yml
+|4,48,13,8,1590988632,"~/realbackup.yml"
+'1  20  95  ~/backup.yml
+|4,49,20,95,1590988262,"~/backup.yml"
+'2  1  2  ~/backup.yml
+|4,50,1,2,1590988227,"~/backup.yml"
+'3  1  2  ~/backup.yml
+|4,51,1,2,1590988227,"~/backup.yml"
+'4  1  95  ~/backup.yml
+|4,52,1,95,1590988218,"~/backup.yml"
+'5  1  95  ~/backup.yml
+|4,53,1,95,1590988218,"~/backup.yml"
+'6  38  95  ~/backup.yml
+|4,54,38,95,1590988218,"~/backup.yml"
+'7  38  95  ~/backup.yml
+|4,55,38,95,1590988218,"~/backup.yml"
+'8  19  78  ~/iosplay.yml
+|4,56,19,78,1590988056,"~/iosplay.yml"
+'9  19  95  ~/iosplay.yml
+|4,57,19,95,1590987925,"~/iosplay.yml"
 
 # Jumplist (newest first):
--'  4  6  ~/myansible.yml
-|4,39,4,6,1590959269,"~/myansible.yml"
--'  26  0  ~/myansible.yml
-|4,39,26,0,1590959249,"~/myansible.yml"
--'  27  0  ~/myansible.yml
-|4,39,27,0,1590959242,"~/myansible.yml"
--'  5  10  ~/myansible.yml
-|4,39,5,10,1590959236,"~/myansible.yml"
--'  5  10  ~/myansible.yml
-|4,39,5,10,1590959227,"~/myansible.yml"
--'  5  11  ~/myansible.yml
-|4,39,5,11,1590959137,"~/myansible.yml"
--'  5  0  ~/myansible.yml
-|4,39,5,0,1590959117,"~/myansible.yml"
--'  6  0  ~/myansible.yml
-|4,39,6,0,1590959117,"~/myansible.yml"
--'  6  0  ~/myansible.yml
-|4,39,6,0,1590959117,"~/myansible.yml"
--'  6  0  ~/myansible.yml
-|4,39,6,0,1590959117,"~/myansible.yml"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  3  8  ~/ansible.cfg
-|4,39,3,8,1590959109,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  4  23  ~/ansible.cfg
-|4,39,4,23,1590959086,"~/ansible.cfg"
--'  6  0  ~/myansible.yml
-|4,39,6,0,1590959080,"~/myansible.yml"
--'  6  0  ~/myansible.yml
-|4,39,6,0,1590959080,"~/myansible.yml"
--'  5  0  ~/myansible.yml
-|4,39,5,0,1590958945,"~/myansible.yml"
--'  5  0  ~/myansible.yml
-|4,39,5,0,1590958945,"~/myansible.yml"
--'  5  0  ~/myansible.yml
-|4,39,5,0,1590958723,"~/myansible.yml"
--'  5  0  ~/myansible.yml
-|4,39,5,0,1590958723,"~/myansible.yml"
--'  5  19  ~/myansible.yml
-|4,39,5,19,1590958626,"~/myansible.yml"
--'  5  19  ~/myansible.yml
-|4,39,5,19,1590958626,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958615,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958593,"~/myansible.yml"
--'  3  9  ~/myansible.yml
-|4,39,3,9,1590958593,"~/myansible.yml"
--'  5  15  ~/myansible.yml
-|4,39,5,15,1590958537,"~/myansible.yml"
--'  5  15  ~/myansible.yml
-|4,39,5,15,1590958537,"~/myansible.yml"
--'  3  15  ~/myansible.yml
-|4,39,3,15,1590958504,"~/myansible.yml"
--'  3  15  ~/myansible.yml
-|4,39,3,15,1590958504,"~/myansible.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
--'  12  0  ~/campus1.yml
-|4,39,12,0,1590958488,"~/campus1.yml"
+-'  13  8  ~/realbackup.yml
+|4,39,13,8,1590988632,"~/realbackup.yml"
+-'  1  0  ~/realbackup.yml
+|4,39,1,0,1590988580,"~/realbackup.yml"
+-'  20  95  ~/backup.yml
+|4,39,20,95,1590988262,"~/backup.yml"
+-'  20  95  ~/backup.yml
+|4,39,20,95,1590988262,"~/backup.yml"
+-'  1  2  ~/backup.yml
+|4,39,1,2,1590988229,"~/backup.yml"
+-'  1  2  ~/backup.yml
+|4,39,1,2,1590988229,"~/backup.yml"
+-'  1  2  ~/backup.yml
+|4,39,1,2,1590988227,"~/backup.yml"
+-'  1  2  ~/backup.yml
+|4,39,1,2,1590988227,"~/backup.yml"
+-'  38  95  ~/backup.yml
+|4,39,38,95,1590988219,"~/backup.yml"
+-'  38  95  ~/backup.yml
+|4,39,38,95,1590988219,"~/backup.yml"
+-'  38  95  ~/backup.yml
+|4,39,38,95,1590988218,"~/backup.yml"
+-'  38  95  ~/backup.yml
+|4,39,38,95,1590988218,"~/backup.yml"
+-'  1  0  ~/backup.yml
+|4,39,1,0,1590988198,"~/backup.yml"
+-'  1  0  ~/backup.yml
+|4,39,1,0,1590988198,"~/backup.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  78  ~/iosplay.yml
+|4,39,19,78,1590988056,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  19  95  ~/iosplay.yml
+|4,39,19,95,1590987925,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987750,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  13  ~/iosplay.yml
+|4,39,16,13,1590987667,"~/iosplay.yml"
+-'  16  2  ~/iosplay.yml
+|4,39,16,2,1590987645,"~/iosplay.yml"
+-'  16  2  ~/iosplay.yml
+|4,39,16,2,1590987645,"~/iosplay.yml"
+-'  16  2  ~/iosplay.yml
+|4,39,16,2,1590987645,"~/iosplay.yml"
+-'  16  2  ~/iosplay.yml
+|4,39,16,2,1590987645,"~/iosplay.yml"
+-'  16  2  ~/iosplay.yml
+|4,39,16,2,1590987645,"~/iosplay.yml"
+-'  16  2  ~/iosplay.yml
+|4,39,16,2,1590987645,"~/iosplay.yml"
 
 # History of marks within files (newest to oldest):
 
+> ~/realbackup.yml
+	*	1590988631	0
+	"	13	8
+	^	13	9
+	.	13	9
+	+	12	19
+	+	10	22
+	+	13	9
+
+> ~/backup.yml
+	*	1590988261	0
+	"	20	95
+	^	20	96
+	.	20	46
+	+	1	46
+	+	1	3
+	+	20	46
+
+> ~/iosplay.yml
+	*	1590988053	0
+	"	19	78
+	^	19	79
+	.	19	86
+	+	1	3
+	+	16	35
+	+	9	4
+	+	10	6
+	+	11	8
+	+	12	8
+	+	8	2
+	+	14	1
+	+	16	1
+	+	9	17
+	+	16	43
+	+	19	86
+
+> ~/macplay.yml
+	*	1590986336	0
+	"	9	33
+	^	9	34
+	.	9	33
+	+	2	14
+	+	3	11
+	+	8	34
+	+	9	33
+
+> ~/arpplay.yml
+	*	1590984930	0
+	"	3	13
+	^	3	14
+	.	3	13
+	+	1	3
+	+	3	11
+	+	14	5
+	+	6	6
+	+	2	0
+	+	5	18
+	+	7	0
+	+	6	19
+	+	6	3
+	+	6	4
+	+	3	18
+	+	5	0
+	+	3	11
+	+	6	0
+	+	14	12
+	+	3	13
+
+> ~/arp2.yml
+	*	1590984399	0
+	"	5	0
+	^	5	0
+	.	13	0
+	+	1	3
+	+	13	0
+
 > ~/myansible.yml
-	*	1590959267	0
-	"	4	6
-	^	4	7
-	.	4	6
+	*	1590982848	0
+	"	4	10
+	^	4	11
+	.	4	10
 	+	26	0
 	+	1	2
 	+	3	2
@@ -369,7 +430,18 @@
 	+	5	0
 	+	4	10
 	+	3	0
-	+	4	6
+	+	4	10
+
+> ~/myansible.
+	*	1590982614	0
+	"	1	0
+
+> ~/arpplay
+	*	1590982258	0
+	"	14	40
+	^	14	41
+	.	14	40
+	+	14	40
 
 > ~/ansible.cfg
 	*	1590959107	0

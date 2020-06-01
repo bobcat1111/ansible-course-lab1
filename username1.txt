@@ -1,0 +1,4 @@
+S5 | SUCCESS | rc=0 >>
+username david privilege 15 password 0 cisco
+S2 | SUCCESS | rc=0 >>
+username david privilege 15 password 0 cisco
